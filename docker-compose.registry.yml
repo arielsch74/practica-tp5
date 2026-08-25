@@ -1,0 +1,45 @@
+# Variante del compose que NO construye: baja las imágenes ya publicadas.
+#
+# El docker-compose.yml de al lado usa `build: ./backend`, y por eso necesita el
+# código fuente. Éste usa `image:` con el nombre completo en el registry, así que
+# funciona en cualquier máquina con Docker — sin clonar el código.
+#
+#   cp .env.example .env      # sigue haciendo falta: la contraseña no viaja
+#   docker compose -f docker-compose.registry.yml up -d
+#
+# 🔴 Cambiá `ingsoft3ucc` por TU usuario de GitHub, en las dos líneas `image:`
+#    de abajo. Va todo en minúsculas, aunque tu usuario tenga mayúsculas.
+#    Si no lo cambiás vas a levantar las imágenes de la cátedra —que son
+#    públicas y funcionan— y el ejercicio no prueba nada sobre las tuyas.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: app
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    image: ghcr.io/ingsoft3ucc/mi-backend:v0.1.0   # ← antes: build: ./backend
+    environment:
+      ConnectionStrings__Default: "Host=db;Database=app;Username=postgres;Password=${DB_PASSWORD}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/ingsoft3ucc/mi-frontend:v0.1.0  # ← antes: build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
