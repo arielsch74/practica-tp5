@@ -50,3 +50,11 @@ export function prioridadDe(tarea, ahora = new Date()) {
   }
   return 'vieja'
 }
+
+/** Cuenta las tareas que siguen pendientes. (Sin tests, a proposito.) */
+export function contarPendientes(tareas) {
+  if (!Array.isArray(tareas)) {
+    return 0
+  }
+  return tareas.filter((t) => !t.completada).length
+}
