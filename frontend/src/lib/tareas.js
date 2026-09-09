@@ -50,3 +50,36 @@ export function prioridadDe(tarea, ahora = new Date()) {
   }
   return 'vieja'
 }
+
+/** Resume el estado de una lista de tareas. (Sin tests, a proposito.) */
+export function resumirEstado(tareas, ahora = new Date()) {
+  if (!Array.isArray(tareas)) {
+    return { total: 0, pendientes: 0, vencidas: 0, etiqueta: 'invalida' }
+  }
+  if (tareas.length === 0) {
+    return { total: 0, pendientes: 0, vencidas: 0, etiqueta: 'sin-tareas' }
+  }
+  let pendientes = 0
+  let vencidas = 0
+  let sinFecha = 0
+  for (const t of tareas) {
+    if (t.completada) {
+      continue
+    }
+    pendientes += 1
+    if (!t.venceEl) {
+      sinFecha += 1
+    } else if (new Date(t.venceEl) < ahora) {
+      vencidas += 1
+    }
+  }
+  let etiqueta = 'al-dia'
+  if (vencidas > 0) {
+    etiqueta = 'con-vencidas'
+  } else if (sinFecha === pendientes && pendientes > 0) {
+    etiqueta = 'sin-plazos'
+  } else if (pendientes > tareas.length / 2) {
+    etiqueta = 'cargada'
+  }
+  return { total: tareas.length, pendientes, vencidas, sinFecha, etiqueta }
+}
