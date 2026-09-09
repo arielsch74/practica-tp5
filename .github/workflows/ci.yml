@@ -30,6 +30,39 @@ jobs:
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
+      - name: Construir la etapa de tests
+        uses: docker/build-push-action@v7
+        with:
+          context: ./backend
+          target: test          # ← se detiene en la etapa de tests, no llega a final
+          load: true            # ← deja la imagen en el Docker local, para poder correrla
+          push: false
+          tags: backend-test:ci
+          cache-from: type=gha,scope=backend-test
+          cache-to: type=gha,mode=max,scope=backend-test
+
+      - name: Correr los tests con coverage
+        run: |
+          docker run --rm -v "${{ github.workspace }}/TestResults:/out" backend-test:ci \
+            --collect:"XPlat Code Coverage"
+
+      - name: Reporte de coverage
+        if: ${{ !cancelled() }}        # ← también cuando los tests fallaron: es la corrida que se entrega
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -sourcedirs:backend \
+            -targetdir:coveragereport "-reporttypes:Html;MarkdownSummaryGithub" "-classfilters:+DemoApi.Logica*;+DemoApi.Servicios*"
+          cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Publicar coverage y resultados
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: |
+            coveragereport
+            TestResults/tests.trx
+
   build-frontend:
     runs-on: ubuntu-latest
     steps:
@@ -52,3 +85,26 @@ jobs:
           tags: frontend:ci
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Construir la etapa de tests del frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: ./frontend
+          target: test
+          load: true
+          push: false
+          tags: frontend-test:ci
+          cache-from: type=gha,scope=frontend-test
+          cache-to: type=gha,mode=max,scope=frontend-test
+
+      - name: Correr los tests del frontend con coverage
+        run: |
+          docker run --rm -e COVERAGE_DIR=/salida/reporte \
+            -v "${{ github.workspace }}/frontend-coverage:/salida" frontend-test:ci
+
+      - name: Publicar el coverage del frontend
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-frontend
+          path: frontend-coverage

@@ -6,7 +6,14 @@ RUN npm ci                 # ci, no install: respeta el lockfile
 COPY . .
 RUN npm run build
 
-# ---- Etapa 2: nginx sirve los estáticos ----
+# ---- Etapa 2: tests (parte del build, con node y las dev dependencies) ----
+# Misma idea que en el backend: la etapa se para ANTES de la imagen final, así
+# que los tests corren contra exactamente lo que se va a publicar, no contra una
+# segunda receta escrita a mano en el pipeline.
+FROM build AS test
+ENTRYPOINT ["npm", "run", "test:ci"]
+
+# ---- Etapa 3: nginx sirve los estáticos ----
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
