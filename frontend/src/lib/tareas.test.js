@@ -7,11 +7,11 @@ describe('validarTitulo', () => {
     expect(resultado).toEqual({ valido: true, titulo: 'Estudiar para la defensa' })
   })
 
-  // it('rechaza títulos vacíos o de solo espacios', () => {
-//     expect(validarTitulo('').valido).toBe(false)
-//     expect(validarTitulo('   ').valido).toBe(false)
-//     expect(validarTitulo(null).valido).toBe(false)
-//   })
+  it('rechaza títulos vacíos o de solo espacios', () => {
+    expect(validarTitulo('').valido).toBe(false)
+    expect(validarTitulo('   ').valido).toBe(false)
+    expect(validarTitulo(null).valido).toBe(false)
+  })
 
   it('rechaza títulos que superan el largo máximo', () => {
     const resultado = validarTitulo('a'.repeat(LARGO_MAXIMO + 1))
