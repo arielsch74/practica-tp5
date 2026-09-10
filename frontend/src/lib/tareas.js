@@ -29,3 +29,14 @@ export function ordenarTareas(tareas) {
     return porFecha !== 0 ? porFecha : b.id - a.id
   })
 }
+
+/**
+ * Devuelve las tareas pendientes de un usuario.
+ * El cliente HTTP entra POR PARÁMETRO: eso es lo que permite pasarle un
+ * impostor en el test. La función sigue haciendo lo mismo; lo único que
+ * cambió es de dónde saca con qué hablar.
+ */
+export async function pendientesDe(usuario, traer) {
+  const tareas = await traer(`/api/tareas?u=${usuario}`)
+  return tareas.filter((t) => !t.hecha)
+}
