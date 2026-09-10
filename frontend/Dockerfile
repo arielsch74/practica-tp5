@@ -6,6 +6,9 @@ RUN npm ci                 # ci, no install: respeta el lockfile
 COPY . .
 RUN npm run build
 
+FROM build AS test
+ENTRYPOINT ["npm", "run", "test:ci"]
+
 # ---- Etapa 2: nginx sirve los estáticos ----
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
