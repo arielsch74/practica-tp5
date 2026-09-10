@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { LARGO_MAXIMO, ordenarTareas, validarTitulo } from './tareas.js'
+import { describe, expect, it, vi } from 'vitest'
+import { LARGO_MAXIMO, ordenarTareas, pendientesDe, validarTitulo } from './tareas.js'
 
 describe('validarTitulo', () => {
   it('acepta un título válido y lo normaliza con trim', () => {
@@ -30,5 +30,30 @@ describe('ordenarTareas', () => {
     const ordenadas = ordenarTareas(tareas)
     expect(ordenadas.map((t) => t.titulo)).toEqual(['nueva', 'media', 'vieja'])
     expect(tareas[0].titulo).toBe('vieja')
+  })
+})
+
+describe('pendientesDe', () => {
+  it('devuelve sólo las tareas que no están hechas', async () => {
+    // el impostor: contesta lo que yo quiera, sin red y sin backend
+    const traer = vi.fn().mockResolvedValue([
+      { id: 1, titulo: 'hecha', hecha: true },
+      { id: 2, titulo: 'una', hecha: false },
+      { id: 3, titulo: 'otra', hecha: false },
+    ])
+    const pendientes = await pendientesDe('ana', traer)
+    expect(pendientes.map((t) => t.titulo)).toEqual(['una', 'otra'])
+  })
+
+  it('le pide a la API la ruta del usuario', async () => {
+    const traer = vi.fn().mockResolvedValue([])
+    await pendientesDe('ana', traer)
+    // el assert que no mira el valor devuelto: mira QUÉ le pediste
+    expect(traer).toHaveBeenCalledWith('/api/tareas?u=ana')
+  })
+
+  it('devuelve una lista vacía si la API no trae nada', async () => {
+    const traer = vi.fn().mockResolvedValue([])
+    expect(await pendientesDe('ana', traer)).toEqual([])
   })
 })
