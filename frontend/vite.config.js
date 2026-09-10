@@ -10,4 +10,12 @@ export default defineConfig({
       '/api': 'http://localhost:8080',
     },
   },
+  test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov', 'json-summary'],
+      include: ['src/lib/**'],                  // ← QUÉ se mide: acá vive la lógica
+      thresholds: { lines: 80, branches: 80 },  // ← TU número, el que puedas defender
+    },
+  },
 })
