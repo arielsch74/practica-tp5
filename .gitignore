@@ -14,3 +14,7 @@ dist/
 .DS_Store
 .vs/
 .idea/
+coverage/
+frontend-coverage/
+TestResults/
+coveragereport/
