@@ -14,6 +14,12 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
+// 🔴 EL PASO QUE LOS TESTS NO RECLAMAN (TP5 §3.0). Al sacar el `new` de adentro
+// de ServicioDeTareas, la app dejó de saber qué instancia usar. Si esto falta, los
+// tests pasan igual —le pasan el impostor a mano— y la primera llamada real revienta.
+builder.Services.AddScoped<DemoApi.Servicios.INotificador, DemoApi.Servicios.NotificadorEmail>();
+builder.Services.AddScoped<DemoApi.Servicios.ServicioDeTareas>();
+
 var app = builder.Build();
 
 app.UseCors();
