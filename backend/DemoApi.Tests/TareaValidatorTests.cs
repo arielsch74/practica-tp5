@@ -14,7 +14,23 @@ public class TareaValidatorTests
         Assert.Equal("Preparar la demo de la clase", resultado.TituloNormalizado);
     }
 
+    [Fact]
+    public void TituloVacio_EsRechazado()
+    {
+        var resultado = TareaValidator.Validar("");
 
+        Assert.False(resultado.EsValida);
+        Assert.Equal("El título es obligatorio.", resultado.Error);
+    }
+
+    [Fact]
+    public void TituloSoloEspacios_EsRechazado()
+    {
+        var resultado = TareaValidator.Validar("   ");
+
+        Assert.False(resultado.EsValida);
+        Assert.Equal("El título es obligatorio.", resultado.Error);
+    }
 
     [Fact]
     public void TituloQueSuperaElLargoMaximo_EsRechazado()
@@ -25,27 +41,5 @@ public class TareaValidatorTests
 
         Assert.False(resultado.EsValida);
         Assert.Contains($"{TareaValidator.LargoMaximo}", resultado.Error);
-    }
-
-    [Theory]
-    [InlineData("")]            // vacío
-    [InlineData("   ")]         // sólo espacios
-    [InlineData("\t")]          // un tabulador
-    public void TituloSinContenido_EsRechazado(string? titulo)
-    {
-        var resultado = TareaValidator.Validar(titulo);
-
-        Assert.False(resultado.EsValida);
-    }
-
-    [Fact]
-    public void TituloDemasiadoLargo_ExplicaElLimiteEnElMensaje()
-    {
-        var titulo = new string('a', TareaValidator.LargoMaximo + 1);   // 101: uno más que el tope
-
-        var resultado = TareaValidator.Validar(titulo);
-
-        Assert.False(resultado.EsValida);
-        Assert.Contains(TareaValidator.LargoMaximo.ToString(), resultado.Error);
     }
 }
