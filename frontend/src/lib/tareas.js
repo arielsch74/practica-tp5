@@ -29,3 +29,35 @@ export function ordenarTareas(tareas) {
     return porFecha !== 0 ? porFecha : b.id - a.id
   })
 }
+
+/**
+ * Devuelve las tareas pendientes de un usuario.
+ * El cliente HTTP entra POR PARÁMETRO: eso es lo que permite pasarle un
+ * impostor en el test. La función sigue haciendo lo mismo; lo único que
+ * cambió es de dónde saca con qué hablar.
+ */
+export async function pendientesDe(usuario, traer) {
+  const tareas = await traer(`/api/tareas?u=${usuario}`)
+  return tareas.filter((t) => !t.hecha)
+}
+
+/**
+ * Devuelve la prioridad de una tarea segun cuanto hace que se creo.
+ * (Tiene varios caminos adentro y —a proposito— ni un solo test.)
+ */
+export function prioridadDe(tarea, ahora = new Date()) {
+  if (!tarea || !tarea.creadaEl) {
+    return 'sin-fecha'
+  }
+  const dias = (ahora - new Date(tarea.creadaEl)) / 86400000
+  if (dias < 1) {
+    return 'nueva'
+  }
+  if (dias < 7) {
+    return 'esta-semana'
+  }
+  if (dias < 30) {
+    return 'este-mes'
+  }
+  return 'vieja'
+}
