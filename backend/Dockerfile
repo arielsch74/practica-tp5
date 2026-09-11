@@ -12,7 +12,15 @@ RUN dotnet restore Backend.sln
 COPY . .
 RUN dotnet publish DemoApi/DemoApi.csproj -c Release -o /app/publish
 
-# ---- Etapa 2: runtime (imagen mínima, sin SDK) ----
+# ---- Etapa 2: tests (parte del build, con el SDK adentro) ----
+FROM build AS test
+ENTRYPOINT ["dotnet", "test", "Backend.sln", \
+            "/p:CollectCoverage=true", "/p:Threshold=70", "/p:ThresholdType=line", \
+            "/p:Exclude=[DemoApi]Program*%2c[DemoApi]DemoApi.Data.*%2c[DemoApi]DemoApi.Models.*", \
+            "--logger", "trx;LogFileName=tests.trx", \
+            "--results-directory", "/out"]
+
+# ---- Etapa 3: runtime (imagen mínima, sin SDK) ----
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
