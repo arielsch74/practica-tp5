@@ -7,18 +7,18 @@ describe('validarTitulo', () => {
     expect(resultado).toEqual({ valido: true, titulo: 'Estudiar para la defensa' })
   })
 
-//   // PARAMETRIZADO: un solo test, varios datos. El equivalente del [Theory]
-//   // con [InlineData] del backend — la misma regla, no tres tests copiados.
-//   it.each([
-//     ['vacío', ''],
-//     ['sólo espacios', '   '],
-//     ['un tabulador', '\t'],
-//     ['nulo', null],
-//   ])('rechaza un título %s', (_caso, entrada) => {
-//     const resultado = validarTitulo(entrada)
-//     expect(resultado.valido).toBe(false)
-//     expect(resultado.error).toBe('El título es obligatorio.')
-//   })
+  // PARAMETRIZADO: un solo test, varios datos. El equivalente del [Theory]
+  // con [InlineData] del backend — la misma regla, no tres tests copiados.
+  it.each([
+    ['vacío', ''],
+    ['sólo espacios', '   '],
+    ['un tabulador', '\t'],
+    ['nulo', null],
+  ])('rechaza un título %s', (_caso, entrada) => {
+    const resultado = validarTitulo(entrada)
+    expect(resultado.valido).toBe(false)
+    expect(resultado.error).toBe('El título es obligatorio.')
+  })
 
   it('rechaza títulos que superan el largo máximo', () => {
     const resultado = validarTitulo('a'.repeat(LARGO_MAXIMO + 1))
